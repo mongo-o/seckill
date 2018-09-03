@@ -16,7 +16,7 @@ public class BaseRedisService {
     @Autowired
     JedisCluster jedisCluster;
 
-    public void set(BasePrefix prefix, String key, Object value) {
+    public String set(BasePrefix prefix, String key, Object value) {
 
         String val = JSON.toJSONString(value);
         key = getKey(prefix.getPrefixKey(), key);
@@ -25,6 +25,7 @@ public class BaseRedisService {
         if (prefix.getExpireSec() > 0) {
             jedisCluster.expire(key, prefix.getExpireSec());
         }
+        return key;
     }
 
     public Object get(BasePrefix prefix, String key, Class clazz) {

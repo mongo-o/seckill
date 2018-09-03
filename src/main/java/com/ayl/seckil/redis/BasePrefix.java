@@ -10,7 +10,7 @@ public class BasePrefix {
     /**
      * 如歌expiresce为0或负数，则表示永不过期
      */
-    private Integer expireSec;
+    private int expireSec;
     private String prefixKey;
 
     public BasePrefix(String prefixKey) {
@@ -18,7 +18,7 @@ public class BasePrefix {
         this.prefixKey = prefixKey;
     }
 
-    public BasePrefix(Integer expireSec, String prefixKey) {
+    public BasePrefix(int expireSec, String prefixKey) {
         this.expireSec = expireSec;
         this.prefixKey = prefixKey;
     }

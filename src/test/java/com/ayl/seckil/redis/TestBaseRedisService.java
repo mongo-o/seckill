@@ -19,7 +19,6 @@ public class TestBaseRedisService {
     @Test
     public void testGet() {
         redisService.set(RedisUserKey.USER_TOKEN,"key1","value1");
-        redisService.set(RedisUserKey.TEST_TOKEN,"key1","value1");
         System.out.println(redisService.get(RedisUserKey.USER_TOKEN,"key1", String.class));
     }
 
