@@ -1,5 +1,7 @@
 package com.ayl.seckil.service;
 
+import com.ayl.seckil.cookie.CookieUtil;
+import com.ayl.seckil.cookie.LoginCookie;
 import com.ayl.seckil.dao.SeckillUserDao;
 import com.ayl.seckil.domain.SeckillUser;
 import com.ayl.seckil.exception.GlobalException;
@@ -13,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 /**
@@ -26,7 +30,7 @@ public class SeckillUserService {
     @Autowired
     private BaseRedisService redisService;
 
-    public Result doLogin(UserLoginVo userLoginVo) {
+    public Result<String> doLogin(HttpServletResponse response, UserLoginVo userLoginVo) {
         Long phone = Long.valueOf(userLoginVo.getPhone());
         SeckillUser user = seckillUserDao.getUserByPhone(phone);
         if (user != null) {
@@ -34,7 +38,12 @@ public class SeckillUserService {
             String dbPassword = Md5Util.formPasswordToDbPassword(formPassword, user.getSalt());
             boolean result = dbPassword.equals(user.getPassword());
             if(result) {
-                String token = storeLoginUserIntoRedis(userLoginVo);
+                //将登陆信息存储到redis
+                String token = storeLoginUserIntoRedis(user);
+
+                //登陆token通过cookie返回
+                CookieUtil.setCookie(response, LoginCookie.tokenCookie, token);
+
                 return Result.success(token);
             } else {
                 throw new GlobalException(CodeMsg.USER_PASSWORD_DISMATCHED);
@@ -44,9 +53,24 @@ public class SeckillUserService {
         }
     }
 
-    private String storeLoginUserIntoRedis(UserLoginVo userLoginVo) {
+
+    public SeckillUser getLoginUser(HttpServletRequest request, HttpServletResponse response) {
+        String cookieToken = CookieUtil.getCookie(request, LoginCookie.tokenCookie.getCookieName());
+
+        String pathToken = request.getParameter(LoginCookie.tokenCookie.getCookieName());
+
+        String token;
+        if (StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(pathToken)) {
+            return null;
+        }
+        token = StringUtils.isEmpty(cookieToken) ? pathToken : cookieToken;
+
+        return (SeckillUser) redisService.get(RedisUserKey.USER_TOKEN, token, SeckillUser.class);
+    }
+
+    private String storeLoginUserIntoRedis(SeckillUser user) {
         String token = "mongo"; //UUID.randomUUID().toString().replace("-", "");
-        token = redisService.set(RedisUserKey.USER_TOKEN, token, userLoginVo);
+        redisService.set(RedisUserKey.USER_TOKEN, token, user);
         return token;
     }
 
