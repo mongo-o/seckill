@@ -5,8 +5,8 @@ import com.ayl.seckil.cookie.LoginCookie;
 import com.ayl.seckil.dao.SeckillUserDao;
 import com.ayl.seckil.domain.SeckillUser;
 import com.ayl.seckil.exception.GlobalException;
-import com.ayl.seckil.redis.BaseRedisService;
-import com.ayl.seckil.redis.RedisUserKey;
+import com.ayl.seckil.redis.RedisService;
+import com.ayl.seckil.redis.keyprefix.UserPrefix;
 import com.ayl.seckil.result.CodeMsg;
 import com.ayl.seckil.result.Result;
 import com.ayl.seckil.util.Md5Util;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.UUID;
 
 /**
  * @author AYL    2018/8/15 12:53
@@ -28,7 +27,7 @@ public class SeckillUserService {
     private SeckillUserDao seckillUserDao;
 
     @Autowired
-    private BaseRedisService redisService;
+    private RedisService redisService;
 
     public Result<String> doLogin(HttpServletResponse response, UserLoginVo userLoginVo) {
         Long phone = Long.valueOf(userLoginVo.getPhone());
@@ -65,12 +64,12 @@ public class SeckillUserService {
         }
         token = StringUtils.isEmpty(cookieToken) ? pathToken : cookieToken;
 
-        return (SeckillUser) redisService.get(RedisUserKey.USER_TOKEN, token, SeckillUser.class);
+        return (SeckillUser) redisService.get(UserPrefix.USER_TOKEN, token, SeckillUser.class);
     }
 
     private String storeLoginUserIntoRedis(SeckillUser user) {
         String token = "mongo"; //UUID.randomUUID().toString().replace("-", "");
-        redisService.set(RedisUserKey.USER_TOKEN, token, user);
+        redisService.set(UserPrefix.USER_TOKEN, token, user);
         return token;
     }
 

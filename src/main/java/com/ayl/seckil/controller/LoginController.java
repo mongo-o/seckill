@@ -1,10 +1,7 @@
 package com.ayl.seckil.controller;
 
-import com.ayl.seckil.cookie.LoginCookie;
-import com.ayl.seckil.redis.RedisUserKey;
 import com.ayl.seckil.result.Result;
 import com.ayl.seckil.service.SeckillUserService;
-import com.ayl.seckil.cookie.CookieUtil;
 import com.ayl.seckil.vo.UserLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

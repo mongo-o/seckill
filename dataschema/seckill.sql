@@ -24,10 +24,11 @@ CREATE TABLE `order_info` (
   `order_channel` tinyint(3) unsigned NOT NULL COMMENT '订单来源',
   `status` tinyint(3) unsigned NOT NULL COMMENT '设备id',
   `create_date` datetime NOT NULL COMMENT '创建时间',
-  `pay_date` datetime NOT NULL COMMENT '支付时间',
-  `gmt_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '最后一次修改时间',
+  `pay_date` datetime DEFAULT NULL COMMENT '支付时间',
+  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '最后一次修改时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='订单信息';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='订单信息';
+
 
 CREATE TABLE `seckill_goods` (
   `id` bigint(20) auto_increment NOT NULL,

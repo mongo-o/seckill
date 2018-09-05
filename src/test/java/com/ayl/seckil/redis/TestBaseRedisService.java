@@ -1,10 +1,10 @@
 package com.ayl.seckil.redis;
 
+import com.ayl.seckil.redis.keyprefix.UserPrefix;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
@@ -14,12 +14,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class TestBaseRedisService {
     @Autowired
-    private BaseRedisService redisService;
+    private RedisService redisService;
 
     @Test
     public void testGet() {
-        redisService.set(RedisUserKey.USER_TOKEN,"key1","value1");
-        System.out.println(redisService.get(RedisUserKey.USER_TOKEN,"key1", String.class));
+        redisService.set(UserPrefix.USER_TOKEN,"key1","value1");
+        System.out.println(redisService.get(UserPrefix.USER_TOKEN,"key1", String.class));
     }
 
     @Test
@@ -27,7 +27,7 @@ public class TestBaseRedisService {
         int i = 0;
         for (;;) {
             try {
-                String result = (String) redisService.get(RedisUserKey.USER_TOKEN, "key1", String.class);
+                String result = (String) redisService.get(UserPrefix.USER_TOKEN, "key1", String.class);
                 if (i % 10 == 0) {
                     System.out.println("==============" + result);
                 }

@@ -1,4 +1,4 @@
-package com.ayl.seckil.redis;
+package com.ayl.seckil.redis.keyprefix;
 
 import lombok.Getter;
 

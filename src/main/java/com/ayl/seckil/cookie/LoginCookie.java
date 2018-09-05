@@ -1,6 +1,6 @@
 package com.ayl.seckil.cookie;
 
-import com.ayl.seckil.redis.RedisUserKey;
+import com.ayl.seckil.redis.keyprefix.UserPrefix;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -15,5 +15,5 @@ public class LoginCookie extends BaseCookie {
         super(expireSec, cookieName);
     }
 
-    public static LoginCookie tokenCookie = new LoginCookie(RedisUserKey.USER_TOKEN_EXPIRE_SECONDS, "token");
+    public static LoginCookie tokenCookie = new LoginCookie(UserPrefix.USER_TOKEN_EXPIRE_SECONDS, "token");
 }

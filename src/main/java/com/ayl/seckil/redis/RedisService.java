@@ -1,10 +1,9 @@
 package com.ayl.seckil.redis;
 
 import com.alibaba.fastjson.JSON;
+import com.ayl.seckil.redis.keyprefix.BasePrefix;
 import com.ayl.seckil.util.FastJsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.JedisCluster;
 
@@ -12,7 +11,7 @@ import redis.clients.jedis.JedisCluster;
  * @author AYL    2018/8/25 0:31
  */
 @Component
-public class BaseRedisService {
+public class RedisService {
     @Autowired
     JedisCluster jedisCluster;
 
@@ -33,6 +32,14 @@ public class BaseRedisService {
         String value = jedisCluster.get(key);
         return FastJsonUtil.jsongToObject(value,clazz);
     }
+
+    public Long decr(BasePrefix prefix, String key) {
+        key = getKey(prefix.getPrefixKey(), key);
+        Long value = jedisCluster.decr(key);
+        return value;
+    }
+
+
 
     private String getKey(String prefix, String key) {
         return prefix + key;
