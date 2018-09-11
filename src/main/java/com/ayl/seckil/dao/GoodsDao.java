@@ -31,6 +31,6 @@ public interface GoodsDao {
             " from seckill_goods sg inner join goods g on sg.goods_id = g.id" )
     List<SeckillGoodsDetailVo> listSeckillGoodsDetail();
 
-    @Update("update seckill_goods set stock_count = stock_count -1 where goods_id = #{goodsId}")
+    @Update("update seckill_goods set stock_count = stock_count -1 where goods_id = #{goodsId} and stock_count > 0")
     int  subtractSeckillGoodsStock(@Param("goodsId") Long goodsId);
 }

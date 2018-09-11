@@ -25,7 +25,7 @@ public class TestBaseRedisService {
     @Test
     public void testRedisFailover() {
         int i = 0;
-        for (;;) {
+        for (; i < 11; i++) {
             try {
                 String result = (String) redisService.get(UserPrefix.USER_TOKEN, "key1", String.class);
                 if (i % 10 == 0) {

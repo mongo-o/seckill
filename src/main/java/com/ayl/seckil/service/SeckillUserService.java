@@ -12,17 +12,22 @@ import com.ayl.seckil.result.Result;
 import com.ayl.seckil.util.Md5Util;
 import com.ayl.seckil.vo.UserLoginVo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
 /**
  * @author AYL    2018/8/15 12:53
  */
 @Service
 public class SeckillUserService {
+    private static Logger logger = LogManager.getLogger(SeckillUserService.class);
+
     @Autowired
     private SeckillUserDao seckillUserDao;
 
@@ -55,7 +60,6 @@ public class SeckillUserService {
 
     public SeckillUser getLoginUser(HttpServletRequest request, HttpServletResponse response) {
         String cookieToken = CookieUtil.getCookie(request, LoginCookie.tokenCookie.getCookieName());
-
         String pathToken = request.getParameter(LoginCookie.tokenCookie.getCookieName());
 
         String token;
@@ -67,8 +71,12 @@ public class SeckillUserService {
         return (SeckillUser) redisService.get(UserPrefix.USER_TOKEN, token, SeckillUser.class);
     }
 
+    public int insertUser(SeckillUser seckillUser) {
+        return seckillUserDao.insertUser(seckillUser);
+    }
+
     private String storeLoginUserIntoRedis(SeckillUser user) {
-        String token = "mongo"; //UUID.randomUUID().toString().replace("-", "");
+        String token = UUID.randomUUID().toString().replace("-", "");
         redisService.set(UserPrefix.USER_TOKEN, token, user);
         return token;
     }

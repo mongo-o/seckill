@@ -1,6 +1,7 @@
 package com.ayl.seckil.controller;
 
 import com.ayl.seckil.domain.SeckillUser;
+import com.ayl.seckil.needlogin.NeedLogin;
 import com.ayl.seckil.redis.RedisService;
 import com.ayl.seckil.redis.keyprefix.SeckillGoodsPrefix;
 import com.ayl.seckil.redis.keyprefix.SeckillOrderPrefix;
@@ -9,6 +10,8 @@ import com.ayl.seckil.result.Result;
 import com.ayl.seckil.service.GoodsService;
 import com.ayl.seckil.service.SeckillGoodsService;
 import com.ayl.seckil.vo.SeckillGoodsDetailVo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,6 +31,8 @@ import java.util.List;
 @ResponseBody
 @RequestMapping("seckill")
 public class SeckillController implements InitializingBean {
+    private static Logger logger = LogManager.getLogger(SeckillController.class);
+
     @Autowired
     private GoodsService goodsService;
 
@@ -39,7 +44,7 @@ public class SeckillController implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        System.out.println("====afterPropertiesSet======");
+        logger.debug("====afterPropertiesSet======");
         List<SeckillGoodsDetailVo> seckillGoodsDetailVos = goodsService.listSeckillGoodsDetail();
         if (seckillGoodsDetailVos != null && seckillGoodsDetailVos.size() > 0) {
             for(SeckillGoodsDetailVo seckillGoodsDetailVo : seckillGoodsDetailVos) {
@@ -57,10 +62,15 @@ public class SeckillController implements InitializingBean {
     @RequestMapping(path = "do_seckill/{goodsId}", method = RequestMethod.GET)
     public Result doSeckill(@PathVariable("goodsId") Long goodsId, SeckillUser seckillUser) {
         //查库存
-        Integer seckillGoodsStock = (Integer) redisService.get(SeckillGoodsPrefix.SECKILL_GOODS_STOCK_PREFIX,
+        int seckillGoodsStock = (Integer) redisService.get(SeckillGoodsPrefix.SECKILL_GOODS_STOCK_PREFIX,
                 goodsId.toString(), Integer.class);
+        if (seckillUser == null) {
+            logger.error("未登录");
+        }
+        logger.debug("goodsId:{},userId:{},seckillGoodsStock:{}", goodsId, seckillUser.getId(), seckillGoodsStock);
 
         if (seckillGoodsStock < 1) {
+            logger.debug("goodsId:{} redis库存为零", goodsId);
             return Result.error(CodeMsg.SECKILL_OUT_OF_STOCK);
         }
 
@@ -69,9 +79,11 @@ public class SeckillController implements InitializingBean {
                 goodsId.toString(), SeckillGoodsDetailVo.class);
         Date now = new Date();
         if (now.getTime() - seckillGoodsDetailVo.getStartDate().getTime() < 0) {
+            logger.debug("秒杀还未开始。");
             return Result.error(CodeMsg.SECKILL_UN_START);
         }
         if (seckillGoodsDetailVo.getEndDate().getTime() - now.getTime() < 0) {
+            logger.debug("秒杀已经结束");
             return Result.error(CodeMsg.SECKILL_IS_OVER);
         }
 
@@ -80,12 +92,18 @@ public class SeckillController implements InitializingBean {
                 goodsId.toString()+ "_" + seckillUser.getId(),
                 SeckillUser.class);
         if (redisSeckillUser != null) {
+            logger.debug("goodsid:{},userId:{}已经秒杀到了。不能重复秒杀。", goodsId, seckillUser.getId());
             return Result.error(CodeMsg.SECKILL_REPEATED);
         }
 
         //秒杀（减库存，生成订单）
-        seckillGoodsService.doSeckill(goodsId, seckillUser.getId());
-        return Result.success("success");
+        return seckillGoodsService.doSeckill(goodsId, seckillUser.getId());
     }
 
+
+    @RequestMapping(path = "test/{goodsId}", method = RequestMethod.GET)
+    public String doTest(@PathVariable("goodsId") Long goodsId, SeckillUser seckillUser) {
+        logger.debug("goodsId：" + goodsId + ",seckilluser:" + seckillUser.getNickName());
+        return "goodsId：" + goodsId + ",seckilluser:" + seckillUser.getNickName();
+    }
 }
